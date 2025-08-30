@@ -1,8 +1,95 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /home/yrx20040502/finance/improved-chat-logger.sh session_start"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "write|search_replace|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /home/yrx20040502/finance/improved-chat-logger.sh file write \"$TARGET_FILE\" \"文件修改操作\""
+          },
+          {
+            "type": "command",
+            "command": "/bin/bash /home/yrx20040502/finance/claude-backup.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "read_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /home/yrx20040502/finance/improved-chat-logger.sh file read \"$TARGET_FILE\" \"文件读取操作\""
+          }
+        ]
+      },
+      {
+        "matcher": "run_terminal_cmd",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /home/yrx20040502/finance/improved-chat-logger.sh command \"$COMMAND\" \"$EXIT_CODE\" \"$STDOUT\""
+          }
+        ]
+      },
+      {
+        "matcher": "codebase_search|grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /home/yrx20040502/finance/improved-chat-logger.sh tool \"$TOOL_NAME\" \"搜索参数\" \"搜索结果\""
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /home/yrx20040502/finance/improved-chat-logger.sh tool \"$TOOL_NAME\" \"工具参数\" \"工具输出\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /home/yrx20040502/finance/improved-chat-logger.sh conversation \"$USER_PROMPT\" \"AI回复内容将在此后记录\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".go\"))' | xargs -r gofmt -w"
+          }
+        ]
+      }
+    ]
   }
 }
